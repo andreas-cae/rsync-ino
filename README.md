@@ -1,4 +1,4 @@
-WHAT IS RSYNC?
+WHAT IS RSYNC (and RSYNC-INO)?
 --------------
 
 Rsync is a fast and extraordinarily versatile file copying tool for
@@ -13,6 +13,17 @@ between two files normally requires local access to both files.
 
 A technical report describing the rsync algorithm is included with this
 package.
+
+## WHAT IS RSYNC-INO?
+
+rsync-ino is a fork of rsync that implement saving file metadata to binary
+log-file. The reason for the fork rather than brach is:
+1. The feature is probably very specific to my needs, and not of interest to
+   implement in standard rsync
+2. My C-coding skills are awful, nobody needs to suffer reading through it
+
+The suffix *-ino of the name refers to the file inodes that I originally 
+needed to extract from rsync, although other metadata can now be saved.
 
 
 USAGE
