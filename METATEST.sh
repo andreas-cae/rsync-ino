@@ -16,7 +16,7 @@ while read -r dir; do
 done < <(find $SRC -type d)
 
 
-METAOUT="$(PWD)/METAout.bin"
+METAOUT="$(pwd)/METAout.bin"
 rm  $METAOUT
 
-./rsync -a $OPT --meta-log="$METAOUT" --meta-top="MTOP" --meta-fmt='iTN' "$SRC"/ "$TGT"
+echo ./rsync -a $OPT --meta-log="$METAOUT" --meta-top="MTOP" --meta-fmt='iTN' "$SRC"/ "$TGT"
