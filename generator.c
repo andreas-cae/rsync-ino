@@ -1234,6 +1234,25 @@ static void recv_generator(char *fname, struct file_struct *file, int ndx,
 	if (DEBUG_GTE(GENR, 1))
 		rprintf(FINFO, "recv_generator(%s,%d)\n", fname, ndx);
 
+	// AHALL
+	/* LIKELY Suitable point for injection of meta file-write
+	Possibly, a meta_only flag could make rsync ONLY write the meta-file, and skip
+	both file copy and the list-only, i.e. none of the variants below will copy any files:
+	
+	rsync ... --meta-log=... --list-only 	# writes meta file and lists files to stdout
+	rsync ... --meta-log=... --meta-only	# writes only meta file, 
+	rsync ... --meta-log=... --list-only --meta-only	# writes meta file only AND lists to stdout
+	rsync ... --meta-only					# scans the files but provide no output at all.
+
+	if (meta_log) {
+		FILE_STAT *st = (l)stat(fname);
+		meta_write_entry(file, fname, ftype, ...);
+		if (meta_only && !list_only)
+			return;
+	}
+	*/
+
+
 	if (list_only) {
 		if (is_dir < 0
 		 || (is_dir && !implied_dirs && file->flags & FLAG_IMPLIED_DIR))
@@ -1241,6 +1260,7 @@ static void recv_generator(char *fname, struct file_struct *file, int ndx,
 		list_file_entry(file);
 		return;
 	}
+
 
 	maybe_ATTRS_ACCURATE_TIME = always_checksum ? ATTRS_ACCURATE_TIME : 0;
 
