@@ -213,6 +213,13 @@ int logfile_format_has_o_or_i = 0;
 int always_checksum = 0;
 int list_only = 0;
 
+char *meta_log = NULL;
+char *meta_str = NULL;
+char *meta_fmt = NULL;
+char meta_fmt_default[4] = "iTN";
+
+
+
 #define MAX_BATCH_NAME_LEN 256	/* Must be less than MAXPATHLEN-13 */
 char *batch_name = NULL;
 
@@ -844,6 +851,10 @@ static struct poptOption long_options[] = {
   {"dparam",           0,  POPT_ARG_STRING, 0, OPT_DAEMON, 0, 0 },
   {"detach",           0,  POPT_ARG_NONE,   0, OPT_DAEMON, 0, 0 },
   {"no-detach",        0,  POPT_ARG_NONE,   0, OPT_DAEMON, 0, 0 },
+  {"meta-log",         0,  POPT_ARG_STRING, &meta_log, 0, 0, 0 },
+  {"meta-str",         0,  POPT_ARG_STRING, &meta_str, 0, 0, 0 },
+  {"meta-fmt",         0,  POPT_ARG_STRING, &meta_fmt, 0, 0, 0 },
+
   {0,0,0,0, 0, 0, 0}
 };
 
@@ -2184,6 +2195,25 @@ int parse_arguments(int *argc_p, const char ***argv_p)
 
 	if (argc < 2 && !read_batch && !am_server)
 		list_only |= 1;
+
+	if (meta_log) {
+		if (!meta_fmt)
+			meta_fmt = meta_fmt_default;
+	
+		if (meta_log[0] != '/') {
+			char cwd[MAXPATHLEN];
+			if (getcwd(cwd, sizeof cwd) == NULL) {
+				snprintf(err_buf, sizeof err_buf, "getcwd failed: %s\n", strerror(errno));
+				exit_cleanup(RERR_SYNTAX);
+			}
+			char temp_meta[MAXPATHLEN];
+			pathjoin(temp_meta, MAXPATHLEN, cwd, meta_log);
+			meta_log = strdup(temp_meta);
+		}
+		clean_fname(meta_log, 0);
+//		rprintf(FINFO, "DEBUG: meta-log file: %s, meta_fmt: %s, meta_str: %s\n", meta_log, meta_fmt, meta_str);
+	}
+
 
 	if (xfer_dirs >= 4) {
 		parse_filter_str(&filter_list, "- /*/*", rule_template(0), 0);
