@@ -78,6 +78,7 @@ extern uid_t our_uid;
 extern struct stats stats;
 extern char *filesfrom_host;
 extern char *usermap, *groupmap;
+extern char *meta_log;
 
 extern struct name_num_item *file_sum_nni;
 
@@ -673,10 +674,24 @@ static void send_file_entry(int f, const char *fname, struct file_struct *file,
 #ifdef SUPPORT_HARD_LINKS
   the_end:
 #endif
+
+	if (meta_log != NULL) {
+		STRUCT_STAT st;
+		//rsyserr(FERROR_XFER, errno, "DEBUG: send_file_entry: %s",fname);
+		if (link_stat(fname, &st, copy_dirlinks) == 0) {
+			meta_write_stats(fname, &st);
+		} else {
+			rsyserr(FERROR_XFER, errno, "meta_log: link_stat %s failed", full_fname(fname));
+		}	
+	}
+
+
 	strlcpy(lastname, fname, MAXPATHLEN);
 
 	if (S_ISREG(mode) || S_ISLNK(mode))
 		stats.total_size += F_LENGTH(file);
+
+
 }
 
 static struct file_struct *recv_file_entry(int f, struct file_list *flist, int xflags)

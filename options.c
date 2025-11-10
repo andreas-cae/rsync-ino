@@ -2211,9 +2211,8 @@ int parse_arguments(int *argc_p, const char ***argv_p)
 			meta_log = strdup(temp_meta);
 		}
 		clean_fname(meta_log, 0);
-//		rprintf(FINFO, "DEBUG: meta-log file: %s, meta_fmt: %s, meta_str: %s\n", meta_log, meta_fmt, meta_str);
+		rprintf(FINFO, "DEBUG: meta-log file: %s, meta_fmt: %s, meta_str: %s\n", meta_log, meta_fmt, meta_str);
 	}
-
 
 	if (xfer_dirs >= 4) {
 		parse_filter_str(&filter_list, "- /*/*", rule_template(0), 0);

@@ -1250,7 +1250,23 @@ static void recv_generator(char *fname, struct file_struct *file, int ndx,
 		if (meta_only && !list_only)
 			return;
 	}
+
+	NOPE: FNAME IS THE TARGET NAME!!!
 	*/
+/*
+	extern char *meta_log;
+	extern int copy_dirlinks;
+
+	if (meta_log != NULL) {
+		STRUCT_STAT st;
+		if (link_stat(fname, &st, copy_dirlinks) == 0) {
+			meta_write_stats(fname, &st);
+		} else {
+			rsyserr(FERROR_XFER, errno,
+				"meta_log: link_stat %s failed", full_fname(fname));
+		}	
+	}
+*/
 
 
 	if (list_only) {
