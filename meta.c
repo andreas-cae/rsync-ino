@@ -175,10 +175,18 @@ static int write_str(FILE *fp, const char *s)
 }
 
 
+static uint32_t meta_file_version = 1; /* current version */
+static const char * meta_file_type = "RSYNC-INO";
+
+/** Write header to file
+ * Header format (version 1):
+ * 	    STRING - meta_file_type  (RSYNC-INO)
+ *     	UINT32 - meta_file_version (file version, = 1)
+ *     	STRING - meta_str
+ *     	STRING - meta_fmt
+*/
 static void meta_write_header(void)
 {
-	uint32_t meta_file_version = 2; /* current version */
-
 	if (!meta_fp) {
 		rprintf(FERROR, "Metadata file is not opened for writing header.\n");
 		exit_cleanup(RERR_FILEIO);
@@ -187,13 +195,10 @@ static void meta_write_header(void)
 	int SUCCESS = 0;
 	switch (meta_file_version) {
 		case 1:
-			SUCCESS = write_u32_le(meta_fp, meta_file_version) 
-					  && write_str(meta_fp, meta_str); 
-			break;
-		case 2:
-			SUCCESS = write_u32_le(meta_fp, meta_file_version) 
-					  && write_str(meta_fp, meta_str)
-					  && write_str(meta_fp, meta_fmt);
+			SUCCESS = write_str(meta_fp, meta_file_type)
+					&& write_u32_le(meta_fp, meta_file_version) 
+					&& write_str(meta_fp, meta_str)
+					&& write_str(meta_fp, meta_fmt);
 			break;
 		default:
 			rprintf(FERROR, "Unsupported metadata file version: %d\n", meta_file_version);
