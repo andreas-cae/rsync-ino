@@ -2624,6 +2624,10 @@ char *safe_arg(const char *opt, const char *arg)
  **/
 void server_options(char **args, int *argc_p)
 {
+	if (meta_log) {
+		rprintf(FERROR, "--meta-log is not compatible with remote source\n");
+		exit_cleanup(RERR_UNSUPPORTED);
+	}
 	static char argstr[64];
 	int ac = *argc_p;
 	uchar where;
