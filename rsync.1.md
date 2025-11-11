@@ -1,6 +1,6 @@
 ## NAME
 
-rsync - a fast, versatile, remote (and local) file-copying tool
+rsync-ino - Modified rsync to output binary file list.
 
 ## SYNOPSIS
 
@@ -30,6 +30,14 @@ The online version of this manpage (that includes cross-linking of topics)
 is available at <https://download.samba.org/pub/rsync/rsync.1>.
 
 ## DESCRIPTION
+
+rsync-ino is a modification of rsync, so that it outputs a binary file of file
+metadata for all files matching the rsync filter criteria.
+
+CLI arguments for file-list output have the --meta prefix, e.g., `--meta-log`
+`--meta-fmt`, etc.
+
+Github repository for rsync-ino: <https://github.com/andreas-cae/rsync-ino>
 
 Rsync is a fast and extraordinarily versatile file copying tool.  It can copy
 locally, to/from another host over any remote shell, or to/from a remote rsync
@@ -561,6 +569,13 @@ has its own detailed description later in this manpage.
 --ipv6, -6               prefer IPv6
 --version, -V            print the version + other info and exit
 --help, -h (*)           show this help (* -h is help only on its own)
+--meta-log=FILE          If set, binary file-list will be written to 
+                         this file
+--meta-fmt=FORMAT        Format for binary file, default 'iTN', i.e.,
+                         inode, file-type and file name. See source 
+                         code for format options
+--meta-str=STRING        String to add to file header, typically source 
+                         dir.
 ```
 
 Rsync can also be run as a daemon, in which case the following options are
@@ -3923,6 +3938,70 @@ The options allowed when starting an rsync daemon are as follows:
 
     When specified after `--daemon`, print a short help page describing the
     options available for starting an rsync daemon.
+
+0.  --meta-log=FILE 
+
+    Write file metadata to a binary file. Default metadate written is  
+    
+    File header format:
+    
+    |bytes | type     | comment               |
+    |------|----------|-----------------------|
+    | 4+N  | STRING   | File format specifier |
+    | 4    | uint32_t | File version          |
+    | 4+M  | STRING   | comment string        |
+
+0.  --meta-fmt=FORMAT
+
+    Defines the metadata fields to be written to the meta-file.
+    
+    Format is given as a sequence of characters, determining the order of the fields. Default format is 'iTN' (inode, file type and file name).
+    
+    | fmt  | data        | format   | comment          |
+    |------|-------------|----------|------------------|
+    | N    | fname       | STRING   | File name        |
+    | T    | ftype       | char     | File type (char) |
+    | d    | st_dev      | uint64_t | stat{,64} field  |
+    | i    | st_ino      | uint64_t | stat{,64} field  |
+    | M    | st_mode     | uint32_t | stat{,64} field  |
+    | n    | st_nlink    | uint64_t | stat{,64} field  |
+    | u    | st_uid      | uint32_t | stat{,64} field  |
+    | g    | st_gid      | uint32_t | stat{,64} field  |
+    | r    | st_rdev     | uint64_t | stat{,64} field  |
+    | s    | st_size     | int64_t  | stat{,64} field  |
+    | B    | st_blksize  | int64_t  | stat{,64} field  |
+    | b    | st_blocks   | int64_t  | stat{,64} field  |
+    | a    | st_atime    | int64_t  | stat{,64} field  |
+    | c    | st_ctime    | int64_t  | stat{,64} field  |
+    | m    | st_mtime    | int64_t  | stat{,64} field  |
+    
+    **STRING** represent a string with its length and chartacters as:
+    
+    |bytes | type     | comment                      |
+    |------|----------|------------------------------|
+    | 4    | uint32_t | File format specifier        |
+    | N    | char     | string (no terminating '\0') |
+    
+    
+    File type (char) is a caracter repressenting the file type:
+    ```
+    char get_filetype(mode_t mode)
+    {
+    	if (S_ISREG(mode)) return 'f';
+    	if (S_ISDIR(mode)) return 'd';
+    	if (S_ISLNK(mode)) return 'l';
+    	if (S_ISCHR(mode)) return 'c';
+    	if (S_ISBLK(mode)) return 'b';
+    	if (S_ISFIFO(mode)) return 'p';
+    	if (S_ISSOCK(mode)) return 's';
+    	return '?';
+    }
+    ```
+
+0.  --meta-str=str
+
+    Optional string to be added to file header
+
 
 ## FILTER RULES
 
