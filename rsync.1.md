@@ -3814,6 +3814,69 @@ expand it.
     user wants a more random checksum seed.  Setting NUM to 0 causes rsync to
     use the default of **time**() for checksum seed.
 
+0.  `--meta-log=FILE`
+
+    Write file metadata to a binary file. Default metadate written is  
+    
+    File header format:
+    
+    |bytes | type     | comment               |
+    |------|----------|-----------------------|
+    | 4+N  | STRING   | File format specifier |
+    | 4    | uint32_t | File version          |
+    | 4+M  | STRING   | comment string        |
+
+0.  `--meta-fmt=FORMAT`
+
+    Defines the metadata fields to be written to the meta-file.
+    
+    Format is given as a sequence of characters, determining the order of the fields. Default format is 'iTN' (inode, file type and file name).
+    
+    | fmt  | data        | format   | comment          |
+    |------|-------------|----------|------------------|
+    | N    | fname       | STRING   | File name        |
+    | T    | ftype       | char     | File type (char) |
+    | d    | st_dev      | uint64_t | stat{,64} field  |
+    | i    | st_ino      | uint64_t | stat{,64} field  |
+    | M    | st_mode     | uint32_t | stat{,64} field  |
+    | n    | st_nlink    | uint64_t | stat{,64} field  |
+    | u    | st_uid      | uint32_t | stat{,64} field  |
+    | g    | st_gid      | uint32_t | stat{,64} field  |
+    | r    | st_rdev     | uint64_t | stat{,64} field  |
+    | s    | st_size     | int64_t  | stat{,64} field  |
+    | B    | st_blksize  | int64_t  | stat{,64} field  |
+    | b    | st_blocks   | int64_t  | stat{,64} field  |
+    | a    | st_atime    | int64_t  | stat{,64} field  |
+    | c    | st_ctime    | int64_t  | stat{,64} field  |
+    | m    | st_mtime    | int64_t  | stat{,64} field  |
+    
+    **STRING** represent a string with its length and chartacters as:
+    
+    |bytes | type     | comment                      |
+    |------|----------|------------------------------|
+    | 4    | uint32_t | File format specifier        |
+    | N    | char     | string (no terminating '\0') |
+    
+    
+    File type (char) is a caracter repressenting the file type:
+    ```
+    char get_filetype(mode_t mode)
+    {
+    	if (S_ISREG(mode)) return 'f';
+    	if (S_ISDIR(mode)) return 'd';
+    	if (S_ISLNK(mode)) return 'l';
+    	if (S_ISCHR(mode)) return 'c';
+    	if (S_ISBLK(mode)) return 'b';
+    	if (S_ISFIFO(mode)) return 'p';
+    	if (S_ISSOCK(mode)) return 's';
+    	return '?';
+    }
+    ```
+
+0.  `--meta-str=str`
+
+    Optional string to be added to file header
+
 ## DAEMON OPTIONS
 
 The options allowed when starting an rsync daemon are as follows:
@@ -3939,68 +4002,6 @@ The options allowed when starting an rsync daemon are as follows:
     When specified after `--daemon`, print a short help page describing the
     options available for starting an rsync daemon.
 
-0.  --meta-log=FILE 
-
-    Write file metadata to a binary file. Default metadate written is  
-    
-    File header format:
-    
-    |bytes | type     | comment               |
-    |------|----------|-----------------------|
-    | 4+N  | STRING   | File format specifier |
-    | 4    | uint32_t | File version          |
-    | 4+M  | STRING   | comment string        |
-
-0.  --meta-fmt=FORMAT
-
-    Defines the metadata fields to be written to the meta-file.
-    
-    Format is given as a sequence of characters, determining the order of the fields. Default format is 'iTN' (inode, file type and file name).
-    
-    | fmt  | data        | format   | comment          |
-    |------|-------------|----------|------------------|
-    | N    | fname       | STRING   | File name        |
-    | T    | ftype       | char     | File type (char) |
-    | d    | st_dev      | uint64_t | stat{,64} field  |
-    | i    | st_ino      | uint64_t | stat{,64} field  |
-    | M    | st_mode     | uint32_t | stat{,64} field  |
-    | n    | st_nlink    | uint64_t | stat{,64} field  |
-    | u    | st_uid      | uint32_t | stat{,64} field  |
-    | g    | st_gid      | uint32_t | stat{,64} field  |
-    | r    | st_rdev     | uint64_t | stat{,64} field  |
-    | s    | st_size     | int64_t  | stat{,64} field  |
-    | B    | st_blksize  | int64_t  | stat{,64} field  |
-    | b    | st_blocks   | int64_t  | stat{,64} field  |
-    | a    | st_atime    | int64_t  | stat{,64} field  |
-    | c    | st_ctime    | int64_t  | stat{,64} field  |
-    | m    | st_mtime    | int64_t  | stat{,64} field  |
-    
-    **STRING** represent a string with its length and chartacters as:
-    
-    |bytes | type     | comment                      |
-    |------|----------|------------------------------|
-    | 4    | uint32_t | File format specifier        |
-    | N    | char     | string (no terminating '\0') |
-    
-    
-    File type (char) is a caracter repressenting the file type:
-    ```
-    char get_filetype(mode_t mode)
-    {
-    	if (S_ISREG(mode)) return 'f';
-    	if (S_ISDIR(mode)) return 'd';
-    	if (S_ISLNK(mode)) return 'l';
-    	if (S_ISCHR(mode)) return 'c';
-    	if (S_ISBLK(mode)) return 'b';
-    	if (S_ISFIFO(mode)) return 'p';
-    	if (S_ISSOCK(mode)) return 's';
-    	return '?';
-    }
-    ```
-
-0.  --meta-str=str
-
-    Optional string to be added to file header
 
 
 ## FILTER RULES
