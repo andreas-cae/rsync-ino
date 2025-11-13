@@ -26,6 +26,7 @@ srcdir=@srcdir@
 MKDIR_P=@MKDIR_P@
 VPATH=$(srcdir)
 SHELL=/bin/sh
+PROGNAME=rsync-ino
 
 .SUFFIXES:
 .SUFFIXES: .c .o
@@ -56,7 +57,7 @@ OBJS=$(OBJS1) $(OBJS2) $(OBJS3) $(DAEMON_OBJ) $(LIBOBJ) @BUILD_ZLIB@ @BUILD_POPT
 TLS_OBJ = tls.o syscall.o util2.o t_stub.o lib/compat.o lib/snprintf.o lib/permstring.o lib/sysxattrs.o @BUILD_POPT@
 
 # Programs we must have to run the test cases
-CHECK_PROGS = rsync$(EXEEXT) tls$(EXEEXT) getgroups$(EXEEXT) getfsdev$(EXEEXT) \
+CHECK_PROGS = $(PROGNAME)$(EXEEXT) tls$(EXEEXT) getgroups$(EXEEXT) getfsdev$(EXEEXT) \
 	testrun$(EXEEXT) trimslash$(EXEEXT) t_unsafe$(EXEEXT) wildtest$(EXEEXT)
 
 CHECK_SYMLINKS = testsuite/chown-fake.test testsuite/devices-fake.test testsuite/xattrs-hlink.test
@@ -72,13 +73,13 @@ CHECK_OBJS=tls.o testrun.o getgroups.o getfsdev.o t_stub.o t_unsafe.o trimslash.
 
 # NOTE: consider running "packaging/smart-make" instead of "make" to auto-handle
 # any changes to configure.sh and the main Makefile prior to a "make all".
-all: Makefile rsync$(EXEEXT) stunnel-rsyncd.conf @MAKE_RRSYNC@ @MAKE_MAN@
+all: Makefile $(PROGNAME)$(EXEEXT) stunnel-rsyncd.conf @MAKE_RRSYNC@ @MAKE_MAN@
 .PHONY: all
 
 .PHONY: install
 install: all
 	-$(MKDIR_P) $(DESTDIR)$(bindir)
-	$(INSTALLCMD) $(INSTALL_STRIP) -m 755 rsync$(EXEEXT) $(DESTDIR)$(bindir)
+	$(INSTALLCMD) $(INSTALL_STRIP) -m 755 $(PROGNAME)$(EXEEXT) $(DESTDIR)$(bindir)
 	$(INSTALLCMD) -m 755 $(srcdir)/rsync-ssl $(DESTDIR)$(bindir)
 	-$(MKDIR_P) $(DESTDIR)$(mandir)/man1
 	-$(MKDIR_P) $(DESTDIR)$(mandir)/man5
@@ -102,7 +103,7 @@ install-all: install install-ssl-daemon
 install-strip:
 	$(MAKE) INSTALL_STRIP='-s' install
 
-rsync$(EXEEXT): $(OBJS)
+$(PROGNAME)$(EXEEXT): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 rrsync: support/rrsync
@@ -312,15 +313,15 @@ test: check
 
 .PHONY: check
 check: all $(CHECK_PROGS) $(CHECK_SYMLINKS)
-	rsync_bin=`pwd`/rsync$(EXEEXT) $(srcdir)/runtests.sh
+	rsync_bin=`pwd`/$(PROGNAME)$(EXEEXT) $(srcdir)/runtests.sh
 
 .PHONY: check29
 check29: all $(CHECK_PROGS) $(CHECK_SYMLINKS)
-	rsync_bin=`pwd`/rsync$(EXEEXT) $(srcdir)/runtests.sh --protocol=29
+	rsync_bin=`pwd`/$(PROGNAME)$(EXEEXT) $(srcdir)/runtests.sh --protocol=29
 
 .PHONY: check30
 check30: all $(CHECK_PROGS) $(CHECK_SYMLINKS)
-	rsync_bin=`pwd`/rsync$(EXEEXT) $(srcdir)/runtests.sh --protocol=30
+	rsync_bin=`pwd`/$(PROGNAME)$(EXEEXT) $(srcdir)/runtests.sh --protocol=30
 
 wildtest.o: wildtest.c t_stub.o lib/wildmatch.c rsync.h config.h
 wildtest$(EXEEXT): wildtest.o lib/compat.o lib/snprintf.o @BUILD_POPT@
@@ -341,7 +342,7 @@ testsuite/xattrs-hlink.test:
 
 .PHONY: installcheck
 installcheck: $(CHECK_PROGS) $(CHECK_SYMLINKS)
-	POSIXLY_CORRECT=1 TOOLDIR=`pwd` rsync_bin="$(bindir)/rsync$(EXEEXT)" srcdir="$(srcdir)" $(srcdir)/runtests.sh
+	POSIXLY_CORRECT=1 TOOLDIR=`pwd` rsync_bin="$(bindir)/$(PROGNAME)$(EXEEXT)" srcdir="$(srcdir)" $(srcdir)/runtests.sh
 
 # TODO: Add 'dist' target; need to know which files will be included
 

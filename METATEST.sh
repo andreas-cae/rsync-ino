@@ -64,7 +64,7 @@ if [[ -n "$FILTER" ]]; then
     echo "using filter: $FILTER"
 fi
 
-./rsync -a $OPT $FILTER --meta-log="$METAOUT" --meta-str="MTOP" --meta-fmt='iTN' "$SRC"/ "$TGT"
+./rsync-ino -a $OPT $FILTER --meta-log="$METAOUT" --meta-str="MTOP" --meta-fmt='iTN' "$SRC"/ "$TGT"
 
 hexdump -C "$METAOUT"
 
