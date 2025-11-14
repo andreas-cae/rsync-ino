@@ -12,24 +12,24 @@ Classes:
 
 Functions:
     read_int_le: Read little-endian integers from binary data
-    read_string: Read length-prefixed strings from binary data  
+    read_string: Read length-prefixed strings from binary data
     read_char: Read single character from binary data
     main: Command-line interface for the module
 
 Usage:
     python metareader.py <metadata_file>
-    
+
     Or import as module:
     reader = Reader('metadata.bin')
     for entry in reader:
-        print(entry)   
+        print(entry)
 """
 
 from typing import Generator, NamedTuple, Callable, BinaryIO, Any
 
 __FILETYPE__ = 'RSYNC-INO'
 
-FieldTypes = NamedTuple('FieldTypes', 
+FieldTypes = NamedTuple('FieldTypes',
     [('name', str),
      ('type', str)]
 )
@@ -56,9 +56,9 @@ data_fields = {
 
 def read_int_le(fp, type: str):
     """Read an integer of specified type from file pointer in little-endian format."""
-    int_fmt = {'uint32_t': (4, False) , 
-               'int32_t': (4, True), 
-               'uint64_t': (8, False), 
+    int_fmt = {'uint32_t': (4, False) ,
+               'int32_t': (4, True),
+               'uint64_t': (8, False),
                'int64_t': (8, True)}
     bytes, signed = int_fmt[type]
     bytes_read = fp.read(bytes)
@@ -86,7 +86,7 @@ def read_char(fp):
 
 class Reader:
     """Class to read metadata from a metadata file.
-    
+
     File header information is read on initialization, and the class is iterable to yield
     metadata dictionaries for each file.
     """
@@ -127,8 +127,8 @@ class Reader:
                 header['fmt'] = read_string(fp)
                 header['data_start'] = fp.tell()
             else:
-                raise ValueError(f"Unsupported version: {header['version']}")       
-        return header       
+                raise ValueError(f"Unsupported version: {header['version']}")
+        return header
 
     def __iter__(self) -> Generator[dict, None, None]:
         """Iterator yielding Dict of (name, value) key-value pairs of file metadata."""
@@ -147,10 +147,10 @@ class Reader:
     def __repr__(self):
         return f"<Reader file='{self.file_path}', type='{self.header['filetype']}'" \
                + f" version={self.header['version']} str='{self.header['str']}'>"
-    
+
     def __str__(self):
         return self.__repr__()
-    
+
     def read_all(self) -> list:
         """Read all metadata entries and return as a list of dictionaries."""
         return list(self.__iter__())
@@ -158,11 +158,11 @@ class Reader:
 def main():
     """module test"""
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: python metareader.py <metadata_file>")
         sys.exit(1)
-    
+
     file = sys.argv[1]
     print(f"Reading metadata from file: {file}\n")
     reader = Reader(file)
