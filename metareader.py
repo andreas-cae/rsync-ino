@@ -25,7 +25,7 @@ Usage:
         print(entry)   
 """
 
-from typing import NamedTuple, Callable, BinaryIO, Any
+from typing import Generator, NamedTuple, Callable, BinaryIO, Any
 
 __FILETYPE__ = 'RSYNC-INO'
 
@@ -130,7 +130,7 @@ class Reader:
                 raise ValueError(f"Unsupported version: {header['version']}")       
         return header       
 
-    def __iter__(self) -> dict:
+    def __iter__(self) -> Generator[dict, None, None]:
         """Iterator yielding Dict of (name, value) key-value pairs of file metadata."""
         with open(self.file_path, 'rb') as fp:
             fp.seek(self.header['data_start'])
